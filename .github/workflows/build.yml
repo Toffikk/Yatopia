@@ -47,6 +47,7 @@ jobs:
          git config --global user.name "Github CI"
          git config --global gc.auto 0
          sudo chmod -R -f 777 ./gradlew
+         ./gradlew clean
          ./gradlew initGitSubmodules
          
     - name: Get MC Version
