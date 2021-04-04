@@ -16,7 +16,7 @@ jobs:
 
     strategy:
       matrix:
-        java: [17, 16, 11, 8]
+        java: [17-ea, 16, 11, 8]
       fail-fast: false
 
     steps:
