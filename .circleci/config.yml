@@ -44,4 +44,6 @@ jobs:
       - run: ./gradlew setupUpstream
       - run: ./gradlew applyPatches 
       - run: ./gradlew paperclip
+      - store_artifacts:
+          path: *.jar
   
