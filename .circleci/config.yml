@@ -37,6 +37,8 @@ jobs:
           key: v1-dependencies-{{ checksum "build.gradle.kts" }}
 
       # run tasks!
+      - run: git config --global user.email "you@example.com"
+      - run: git config --global user.name "Your Name"
       - run: ./gradlew clean
       - run: ./gradlew initGitSubmodules
       - run: ./gradlew setupUpstream
