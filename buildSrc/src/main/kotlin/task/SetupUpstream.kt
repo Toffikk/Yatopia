@@ -16,7 +16,7 @@ internal fun Project.createSetupUpstreamTask(
     group = taskGroup
     doLast {
         val setupUpstreamCommand = if (upstreamDir.resolve("scripts/build.sh").exists()) {
-                "scripts/build.sh \"$basedir\" || exit 1"
+            "scripts/build.sh || exit 1"
         } else if (
                 upstreamDir.resolve("build.gradle.kts").exists()
                 && upstreamDir.resolve("subprojects/server.gradle.kts").exists()
@@ -34,22 +34,23 @@ internal fun Project.createSetupUpstreamTask(
                 "gradlew clean build"
             } else {
                 "./gradlew clean build"
-    }
+            }
         } else if (
-        upstreamDir.resolve("build.gradle").exists()
+                upstreamDir.resolve("build.gradle").exists()
         ) {
             if (System.getProperty("os.name").toLowerCase().startsWith("win")) {
                 "gradlew clean build"
             } else {
                 "./gradlew clean build"
-        } else {
-            error("Can't patch upstream! , please check if upstream's build tool is supported")
-            printIn("Supported Tools: Maven , Gradle")
+            } else {
+                error("Can't patch upstream! , please check if upstream's build tool is supported , " +
+                        "Supported Tools: Maven , Gradle")
+            }
+            val result = bashCmd(setupUpstreamCommand, dir = upstreamDir, printOut = true)
+            if (result.exitCode != 0) {
+                error("Failed to apply upstream patches: script exited with code ${result.exitCode}")
+            }
+            lastUpstream.writeText(gitHash(upstreamDir))
         }
-        val result = bashCmd(setupUpstreamCommand, dir = upstreamDir, printOut = true)
-        if (result.exitCode != 0) {
-            error("Failed to apply upstream patches: script exited with code ${result.exitCode}")
-        }
-        lastUpstream.writeText(gitHash(upstreamDir))
     }
 }
