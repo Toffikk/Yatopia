@@ -20,17 +20,26 @@ internal fun Project.createSetupUpstreamTask(
         } else if (
                 upstreamDir.resolve("scripts/apply.sh").exists()
         ) {
+            "scripts/importmcdev.sh"
             "scripts/apply.sh"
         } else if (
                 upstreamDir.resolve("scripts/applyPatches.sh").exists()
         ) {
+            "scripts/generateImports.sh"
+            "scripts/importSources.sh"
             "scripts/applyPatches.sh"
         } else if (
                 upstreamDir.resolve("build.gradle.kts").exists()
                 && upstreamDir.resolve("subprojects/server.gradle.kts").exists()
                 && upstreamDir.resolve("subprojects/api.gradle.kts").exists()
         ) {
-            "./gradlew applyPatches"
+            if (System.getProperty("os.name").toLowerCase().startsWith("win")) {
+                "gradlew importMCDev"
+                "gradlew applyPatches"
+            } else {
+                "./gradlew importMCDev"
+                "./gradlew applyPatches"
+                }
         } else {
             error("Don't know how to setup upstream!")
         }
