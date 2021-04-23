@@ -51,7 +51,7 @@ internal fun Project.createApplyPatchesTask(
             }
         } else {
             val gitCommand = arrayListOf("am", "--3way", "--ignore-whitespace",
-                "--rerere-autoupdate", "--whitespace=fix", "--force",  *patches)
+                "--rerere-autoupdate", "--whitespace=fix", *patches)
             ensureSuccess(gitCmd(*gitCommand.toTypedArray(), dir = projectDir, printOut = true)) {
                 if (wasGitSigningEnabled) reEnableGitSigning(projectDir)
             }
