@@ -44,11 +44,11 @@ internal fun Project.createFixBranchesTask(
                 if (patchPath.listFiles()?.isEmpty() != false) continue
                 val branchName = "${upstream.name}-$folder"
                 ensureSuccess(gitCmd("checkout", branchName, dir = subprojectWorkDir, printOut = true))
-                    ensureSuccess(gitCmd("reset", "--hard", nameMap.get(branchName) as String, dir = subprojectWorkDir,
+                    ensureSuccess(gitCmd("reset", "--hard", "--force", nameMap.get(branchName) as String, dir = subprojectWorkDir,
                         printOut = true))
             }
             // ensureSuccess(gitCmd("checkout", "${toothpick.forkName}-$folder", dir = subprojectWorkDir,
-            ensureSuccess(gitCmd("checkout", "master", dir = subprojectWorkDir,
+            ensureSuccess(gitCmd("checkout", "master", "--force", dir = subprojectWorkDir,
                 printOut = true))
         }
     }

@@ -25,14 +25,14 @@ internal fun Project.createUpdateUpstreamTask(
     group = taskGroup
     doLast {
         ensureSuccess(gitCmd("fetch", dir = upstreamDir, printOut = true))
-        ensureSuccess(gitCmd("reset", "--hard", toothpick.upstreamBranch, dir = upstreamDir, printOut = true))
-        ensureSuccess(gitCmd("add", toothpick.upstream, dir = rootProjectDir, printOut = true))
+        ensureSuccess(gitCmd("reset", "--hard", "--force", toothpick.upstreamBranch, dir = upstreamDir, printOut = true))
+        ensureSuccess(gitCmd("add", "--force", toothpick.upstream, dir = rootProjectDir, printOut = true))
         for (upstream in upstreams) {
             ensureSuccess(gitCmd("fetch", dir = upstream.repoPath.toFile(), printOut = true))
-            ensureSuccess(gitCmd("reset", "--hard", upstream.branch, dir = upstream.repoPath.toFile(), printOut = true))
-            ensureSuccess(gitCmd("add", "upstream/${upstream.name}", dir = rootProjectDir, printOut = true))
+            ensureSuccess(gitCmd("reset", "--hard", "--force", upstream.branch, dir = upstream.repoPath.toFile(), printOut = true))
+            ensureSuccess(gitCmd("add", "--force", "upstream/${upstream.name}", dir = rootProjectDir, printOut = true))
         }
-        ensureSuccess(gitCmd("submodule", "update", "--init", "--recursive", dir = upstreamDir, printOut = true))
+        ensureSuccess(gitCmd("submodule", "update", "--init", "--recursive", "--force", dir = upstreamDir, printOut = true))
         val fileUtils = FileUtils.getFileUtils()
         for (upstream in upstreams) {
             val serverRepoPatches = upstream.getRepoServerPatches()

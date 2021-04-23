@@ -37,7 +37,7 @@ internal fun Project.createApplyPatchesTask(
 
         logger.lifecycle(">>> Applying $applyName patches to $name")
 
-        gitCmd("am", "--abort")
+        gitCmd("am", "--abort", "--force")
 
         //Cursed Apply Mode that makes fixing stuff a lot easier
         if (checkCursed(project)) {
@@ -69,7 +69,7 @@ internal fun Project.createApplyPatchesTask(
             logger.lifecycle(">>> Resetting subproject $name")
             if (projectDir.exists()) {
                 ensureSuccess(gitCmd("fetch", "origin", dir = projectDir))
-                ensureSuccess(gitCmd("reset", "--hard", "origin/master", dir = projectDir))
+                ensureSuccess(gitCmd("reset", "--hard", "origin/master", "--force", dir = projectDir))
             } else {
                 ensureSuccess(gitCmd("clone", sourceRepo.absolutePath, projectDir.absolutePath, printOut = true))
             }
