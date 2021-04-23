@@ -37,7 +37,7 @@ internal fun Project.createApplyPatchesTask(
 
         logger.lifecycle(">>> Applying $applyName patches to $name")
 
-        gitCmd("am", "--abort", "--force")
+        gitCmd("am", "--abort",)
 
         //Cursed Apply Mode that makes fixing stuff a lot easier
         if (checkCursed(project)) {
@@ -45,7 +45,7 @@ internal fun Project.createApplyPatchesTask(
                 val gitCommand = arrayListOf("am", "--3way", "--ignore-whitespace",
                     "--rerere-autoupdate", "--whitespace=fix", "--reject", "-C0", patch)
                 if (gitCmd(*gitCommand.toTypedArray(), dir = projectDir, printOut = true).exitCode != 0) {
-                    gitCmd("add", ".", dir = projectDir, printOut = true)
+                    gitCmd("add", ".", "--force", dir = projectDir, printOut = true)
                     gitCmd("am", "--continue", dir = projectDir, printOut = true)
                 }
             }
