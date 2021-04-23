@@ -43,15 +43,15 @@ internal fun Project.createApplyPatchesTask(
         if (checkCursed(project)) {
             for (patch in patches) {
                 val gitCommand = arrayListOf("am", "--3way", "--ignore-whitespace",
-                    "--rerere-autoupdate", "--whitespace=fix", "--reject", "-C0", patch)
+                    "--rerere-autoupdate", "--whitespace=fix", "--reject", "-C0", "--force", patch)
                 if (gitCmd(*gitCommand.toTypedArray(), dir = projectDir, printOut = true).exitCode != 0) {
-                    gitCmd("add", ".", dir = projectDir, printOut = true)
-                    gitCmd("am", "--continue", dir = projectDir, printOut = true)
+                    gitCmd("add", ".", "--force", dir = projectDir, printOut = true)
+                    gitCmd("am", "--continue", "--force", dir = projectDir, printOut = true)
                 }
             }
         } else {
             val gitCommand = arrayListOf("am", "--3way", "--ignore-whitespace",
-                "--rerere-autoupdate", "--whitespace=fix",  *patches)
+                "--rerere-autoupdate", "--whitespace=fix", "--force",  *patches)
             ensureSuccess(gitCmd(*gitCommand.toTypedArray(), dir = projectDir, printOut = true)) {
                 if (wasGitSigningEnabled) reEnableGitSigning(projectDir)
             }
