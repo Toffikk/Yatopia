@@ -16,32 +16,35 @@ internal fun Project.createSetupUpstreamTask(
     group = taskGroup
     doLast {
         val setupUpstreamCommand = if (upstreamDir.resolve("scripts/build.sh").exists()) {
-                "scripts/build.sh"
-        } else if (
-                upstreamDir.resolve("scripts/apply.sh").exists()
-        ) {
-            "scripts/importmcdev.sh"
-            "scripts/apply.sh"
-        } else if (
-                upstreamDir.resolve("scripts/applyPatches.sh").exists()
-        ) {
-            "scripts/generateImports.sh"
-            "scripts/importSources.sh"
-            "scripts/applyPatches.sh"
+                "scripts/build.sh \"$basedir\" || exit 1"
         } else if (
                 upstreamDir.resolve("build.gradle.kts").exists()
                 && upstreamDir.resolve("subprojects/server.gradle.kts").exists()
                 && upstreamDir.resolve("subprojects/api.gradle.kts").exists()
         ) {
             if (System.getProperty("os.name").toLowerCase().startsWith("win")) {
-                "gradlew importMCDev"
                 "gradlew applyPatches"
             } else {
-                "./gradlew importMCDev"
                 "./gradlew applyPatches"
-                }
+            }
+        } else if (
+                upstreamDir.resolve("build.gradle.kts").exists()
+        ) {
+            if (System.getProperty("os.name").toLowerCase().startsWith("win")) {
+                "gradlew clean build"
+            } else {
+                "./gradlew clean build"
+    }
+        } else if (
+        upstreamDir.resolve("build.gradle").exists()
+        ) {
+            if (System.getProperty("os.name").toLowerCase().startsWith("win")) {
+                "gradlew clean build"
+            } else {
+                "./gradlew clean build"
         } else {
-            error("Don't know how to setup upstream!")
+            error("Can't patch upstream! , please check if upstream's build tool is supported")
+            printIn("Supported Tools: Maven , Gradle")
         }
         val result = bashCmd(setupUpstreamCommand, dir = upstreamDir, printOut = true)
         if (result.exitCode != 0) {
