@@ -16,7 +16,7 @@ internal fun Project.createSetupUpstreamTask(
     group = taskGroup
     doLast {
         val setupUpstreamCommand = if (upstreamDir.resolve("scripts/build.sh").exists()) {
-            "scripts/build.sh || exit 1"
+            "scripts/build.sh"
             "mvn clean install"
         } else if (
                 upstreamDir.resolve("build.gradle.kts").exists()
