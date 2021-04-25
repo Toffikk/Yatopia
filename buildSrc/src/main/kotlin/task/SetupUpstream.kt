@@ -31,9 +31,8 @@ internal fun Project.createSetupUpstreamTask(
             } else {
                 "./gradlew applyPatches"
             }
-            } else {
-                error("Don't know how to setup upstream!")
-            }
+        } else {
+            error("Don't know how to setup upstream!")
         }
         val result = bashCmd(setupUpstreamCommand, dir = upstreamDir, printOut = true)
         if (result.exitCode != 0) {
@@ -41,3 +40,4 @@ internal fun Project.createSetupUpstreamTask(
         }
         lastUpstream.writeText(gitHash(upstreamDir))
     }
+}
