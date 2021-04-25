@@ -50,6 +50,7 @@ internal fun Project.createSetupUpstreamTask(
                 error("Can't patch upstream! , please check if upstream's build tool is supported , " +
                         "Supported Tools: Maven , Gradle")
             }
+        }
             val result = bashCmd(setupUpstreamCommand, dir = upstreamDir, printOut = true)
             if (result.exitCode != 0) {
                 error("Failed to apply upstream patches: script exited with code ${result.exitCode}")
