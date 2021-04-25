@@ -17,7 +17,7 @@ internal fun Project.createSetupUpstreamTask(
     doLast {
         val setupUpstreamCommand = if (upstreamDir.resolve("scripts/build.sh").exists()) {
             if (System.getProperty("os.name").toLowerCase().startsWith("win")) {
-                "scripts/build.sh"
+                ".\${toothpick.upstreamLowercase} patch"
             } else {
                 "./${toothpick.upstreamLowercase} patch"
             }
@@ -27,7 +27,7 @@ internal fun Project.createSetupUpstreamTask(
                 && upstreamDir.resolve("subprojects/api.gradle.kts").exists()
         ) {
             if (System.getProperty("os.name").toLowerCase().startsWith("win")) {
-                "gradlew applyPatches"
+                ".\gradlew applyPatches"
             } else {
                 "./gradlew applyPatches"
             }
