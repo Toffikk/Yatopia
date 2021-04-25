@@ -39,16 +39,18 @@ internal fun Project.createSetupUpstreamTask(
             } else {
                 "./gradlew clean build"
             }
-        } else if (
-                upstreamDir.resolve("build.gradle").exists()
-        ) {
-            if (System.getProperty("os.name").toLowerCase().startsWith("win")) {
-                "gradlew clean build"
-            } else {
-                "./gradlew clean build"
-            } else {
-                error("Can't patch upstream! , please check if upstream's build tool is supported , " +
-                        "Supported Tools: Maven , Gradle")
+        } else {
+            if (
+                    upstreamDir.resolve("build.gradle").exists()
+            ) {
+                if (System.getProperty("os.name").toLowerCase().startsWith("win")) {
+                    "gradlew clean build"
+                } else {
+                    "./gradlew clean build"
+                } else {
+                    error("Can't patch upstream! , please check if upstream's build tool is supported , " +
+                            "Supported Tools: Maven , Gradle")
+                }
             }
         }
             val result = bashCmd(setupUpstreamCommand, dir = upstreamDir, printOut = true)
@@ -58,4 +60,3 @@ internal fun Project.createSetupUpstreamTask(
             lastUpstream.writeText(gitHash(upstreamDir))
         }
     }
-}
