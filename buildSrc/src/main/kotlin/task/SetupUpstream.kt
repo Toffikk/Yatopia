@@ -17,7 +17,7 @@ internal fun Project.createSetupUpstreamTask(
     doLast {
         val setupUpstreamCommand = if (upstreamDir.resolve("scripts/build.sh").exists()) {
             if (System.getProperty("os.name").toLowerCase().startsWith("win")) {
-                "${toothpick.upstreamLowercase} patch"
+                "scripts/build.sh"
             } else {
                 "./${toothpick.upstreamLowercase} patch"
             }
