@@ -39,8 +39,7 @@ internal fun Project.createSetupUpstreamTask(
             } else {
                 "./gradlew clean build"
             }
-        } else {
-            if (
+        } else if (
                     upstreamDir.resolve("build.gradle").exists()
             ) {
                 if (System.getProperty("os.name").toLowerCase().startsWith("win")) {
@@ -48,8 +47,7 @@ internal fun Project.createSetupUpstreamTask(
                 } else {
                     "./gradlew clean build"
                 } else {
-                    error("Can't patch upstream! , please check if upstream's build tool is supported , " +
-                            "Supported Tools: Maven , Gradle")
+                    error("Don't know how to setup upstream!")
                 }
             }
         }
@@ -59,4 +57,3 @@ internal fun Project.createSetupUpstreamTask(
             }
             lastUpstream.writeText(gitHash(upstreamDir))
         }
-    }
