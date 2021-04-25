@@ -16,11 +16,11 @@ internal fun Project.createSetupUpstreamTask(
     group = taskGroup
     doLast {
         val setupUpstreamCommand = if (upstreamDir.resolve("scripts/build.sh").exists()) {
-            "mvn clean install"
-            "scripts/applyPatches.sh"
-            "scripts/init.sh"
-            "scripts/decompile.sh"
-            "scripts/remap.sh"
+            if (System.getProperty("os.name").toLowerCase().startsWith("win")) {
+                "${toothpick.upstreamLowercase} patch"
+            } else {
+                "./${toothpick.upstreamLowercase} patch"
+            }
         } else if (
                 upstreamDir.resolve("build.gradle.kts").exists()
                 && upstreamDir.resolve("subprojects/server.gradle.kts").exists()
