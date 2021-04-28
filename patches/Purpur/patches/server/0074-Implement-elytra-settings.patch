@@ -5,7 +5,7 @@ Subject: [PATCH] Implement elytra settings
 
 
 diff --git a/src/main/java/net/minecraft/world/entity/EntityLiving.java b/src/main/java/net/minecraft/world/entity/EntityLiving.java
-index c540886511261303d2266ac97353e1b98c1f9601..5a060b98fe9f3edc199cd520a636505c653556e9 100644
+index 6fb4b06df010c3099a1af3b145749ea439a4aa39..e2124f60b37436d2514f92e180e914b4d4a8470c 100644
 --- a/src/main/java/net/minecraft/world/entity/EntityLiving.java
 +++ b/src/main/java/net/minecraft/world/entity/EntityLiving.java
 @@ -2955,7 +2955,16 @@ public abstract class EntityLiving extends Entity {

@@ -110,10 +110,10 @@ index 12313a37ceeb6a0b6a539c38fdba67e5e43d7413..848eb25ed0640db61a0f28bc26ddabd0
          updateLight(sender, world, lightengine, queue);
 diff --git a/src/main/java/com/tuinity/tuinity/chunk/light/BlockStarLightEngine.java b/src/main/java/com/tuinity/tuinity/chunk/light/BlockStarLightEngine.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..2b939fabcc4cc45d697bfa2f3cda7fc64a4de8ca
+index 0000000000000000000000000000000000000000..331f0ae05384b29ceb59f2846c52a2194658bb39
 --- /dev/null
 +++ b/src/main/java/com/tuinity/tuinity/chunk/light/BlockStarLightEngine.java
-@@ -0,0 +1,277 @@
+@@ -0,0 +1,289 @@
 +package com.tuinity.tuinity.chunk.light;
 +
 +import net.minecraft.core.BlockPosition;
@@ -125,6 +125,7 @@ index 0000000000000000000000000000000000000000..2b939fabcc4cc45d697bfa2f3cda7fc6
 +import net.minecraft.world.level.block.state.IBlockData;
 +import net.minecraft.world.level.chunk.IChunkAccess;
 +import net.minecraft.world.level.chunk.ILightAccess;
++import net.minecraft.world.level.chunk.ProtoChunk;
 +import net.minecraft.world.level.chunk.ProtoChunkExtension;
 +import net.minecraft.world.phys.shapes.VoxelShape;
 +import net.minecraft.world.phys.shapes.VoxelShapes;
@@ -134,6 +135,7 @@ index 0000000000000000000000000000000000000000..2b939fabcc4cc45d697bfa2f3cda7fc6
 +import java.util.Iterator;
 +import java.util.List;
 +import java.util.Set;
++import java.util.stream.Collectors;
 +
 +public final class BlockStarLightEngine extends StarLightEngine {
 +
@@ -347,7 +349,17 @@ index 0000000000000000000000000000000000000000..2b939fabcc4cc45d697bfa2f3cda7fc6
 +
 +            return ret.iterator();
 +        } else {
-+            return chunk.getLightSources().iterator();
++            if (chunk instanceof ProtoChunk) {
++                ProtoChunk protoChunk = (ProtoChunk)chunk;
++                protoChunk.lockLightSources();
++                try {
++                    return new ArrayList<>(chunk.getLightSources().collect(Collectors.toList())).iterator();
++                } finally {
++                    protoChunk.releaseLightSources();
++                }
++            } else {
++                return new ArrayList<>(chunk.getLightSources().collect(Collectors.toList())).iterator();
++            }
 +        }
 +    }
 +
@@ -4257,7 +4269,7 @@ index 9050ff7180f63c1f5756570446c4d0a8cc767779..9dd0f34aaede93ce4fdff9b41f76166e
                      this.d &= ~(1 << k);
                      if (nibblearray != null) {
 diff --git a/src/main/java/net/minecraft/server/level/EntityPlayer.java b/src/main/java/net/minecraft/server/level/EntityPlayer.java
-index 37c9b5fd712e30a9a0faccc840f738f4b2cfc723..b2cd13541bf3486a69e8f3e41e4c90cdc47180d1 100644
+index f7e9a151ffbbb64cb8f8bc1d37516d7979277b17..980063ada85d7e9660a625d67b2f6a82f80bf535 100644
 --- a/src/main/java/net/minecraft/server/level/EntityPlayer.java
 +++ b/src/main/java/net/minecraft/server/level/EntityPlayer.java
 @@ -661,6 +661,185 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
@@ -4447,7 +4459,7 @@ index 37c9b5fd712e30a9a0faccc840f738f4b2cfc723..b2cd13541bf3486a69e8f3e41e4c90cd
                  this.playerConnection.sendPacket(new PacketPlayOutUpdateHealth(this.getBukkitEntity().getScaledHealth(), this.foodData.getFoodLevel(), this.foodData.getSaturationLevel())); // CraftBukkit
                  this.lastHealthSent = this.getHealth();
 diff --git a/src/main/java/net/minecraft/server/level/LightEngineThreaded.java b/src/main/java/net/minecraft/server/level/LightEngineThreaded.java
-index 0b80569648c1df01aab52d0b8d47028cda925d86..381bd11075599d44e4c705a8e754769d29883d75 100644
+index 0b80569648c1df01aab52d0b8d47028cda925d86..ad584ba21c6e201b778f32cea6d7cc5bf67f9746 100644
 --- a/src/main/java/net/minecraft/server/level/LightEngineThreaded.java
 +++ b/src/main/java/net/minecraft/server/level/LightEngineThreaded.java
 @@ -2,6 +2,11 @@ package net.minecraft.server.level;
@@ -4476,7 +4488,7 @@ index 0b80569648c1df01aab52d0b8d47028cda925d86..381bd11075599d44e4c705a8e754769d
          PlayerChunk playerChunk = playerChunkMap.getVisibleChunk(pair);
          if (playerChunk == null) {
              return false;
-@@ -169,13 +175,218 @@ public class LightEngineThreaded extends LightEngine implements AutoCloseable {
+@@ -169,13 +175,184 @@ public class LightEngineThreaded extends LightEngine implements AutoCloseable {
      private volatile int f = 5;
      private final AtomicBoolean g = new AtomicBoolean();
  
@@ -4547,21 +4559,18 @@ index 0b80569648c1df01aab52d0b8d47028cda925d86..381bd11075599d44e4c705a8e754769d
 +        this.queueUpdate();
 +
 +        return totalChunks;
-+    }
-+
+     }
+ 
 +    protected final Long2IntOpenHashMap holdingChunks = new Long2IntOpenHashMap();
 +    protected final LongArrayList postWorkTicketRelease = new LongArrayList();
 +
 +    private void addLightWorkTicket(int chunkX, int chunkZ) {
 +        final long coordinate = net.minecraft.server.MCUtil.getCoordinateKey(chunkX, chunkZ);
-+        final int current = this.holdingChunks.putIfAbsent(coordinate, 1);
++        final int current = this.holdingChunks.addTo(coordinate, 1);
 +        if (current == 0) {
 +            final ChunkCoordIntPair chunkPos = new ChunkCoordIntPair(coordinate);
 +            this.theLightEngine.getWorld().getChunkProvider().addTicketAtLevel(TicketType.LIGHT_UPDATE, chunkPos,
 +                    net.minecraft.server.MCUtil.getTicketLevelFor(ChunkStatus.LIGHT), chunkPos);
-+            this.theLightEngine.getWorld().getChunkProvider().tickDistanceManager();
-+        } else {
-+            this.holdingChunks.put(coordinate, current + 1);
 +        }
 +    }
 +
@@ -4585,45 +4594,14 @@ index 0b80569648c1df01aab52d0b8d47028cda925d86..381bd11075599d44e4c705a8e754769d
 +
 +        this.addLightWorkTicket(chunkX, chunkZ);
 +
-+        // light doesn't always load one radius neighbours...
-+        // i.e if they get unloaded
-+        boolean neighboursAtFeatures = true;
-+        int targetNeighbourLevel = net.minecraft.server.MCUtil.getTicketLevelFor(ChunkStatus.LIGHT.getPreviousStatus());
-+        for (int dx = -1; dx <= 1; ++dx) {
-+            for (int dz = -1; dz <= 1; ++dz) {
-+                PlayerChunk neighbour = chunkMap.getUpdatingChunk(net.minecraft.server.MCUtil.getCoordinateKey(dx + chunkX, dz + chunkZ));
-+                ChunkStatus status;
-+                if (neighbour == null || neighbour.getTicketLevel() > targetNeighbourLevel ||
-+                        (status = neighbour.getChunkHolderStatus()) == null ||
-+                        !status.isAtLeastStatus(ChunkStatus.LIGHT.getPreviousStatus())) {
-+                    neighboursAtFeatures = false;
-+                    break;
-+                }
-+            }
-+        }
-+
 +        PlayerChunk playerChunk = chunkMap.getUpdatingChunk(net.minecraft.server.MCUtil.getCoordinateKey(chunkX, chunkZ));
 +        ChunkStatus holderStatus;
-+        if (!neighboursAtFeatures || playerChunk == null || playerChunk.getTicketLevel() > targetLevel ||
++        if (playerChunk == null || playerChunk.getTicketLevel() > targetLevel ||
 +                (holderStatus = playerChunk.getChunkHolderStatus()) == null ||
 +                !holderStatus.isAtLeastStatus(ChunkStatus.LIGHT)) {
 +            CompletableFuture<IChunkAccess> ret = new CompletableFuture<>();
 +
-+            int[] loads = new int[1];
-+            int requiredLoads = 3 * 3;
-+            java.util.function.Consumer<IChunkAccess> onLoad = (chunk) -> {
-+                if (++loads[0] == requiredLoads) {
-+                    ret.complete(this.getChunk(chunkX, chunkZ));
-+                }
-+            };
-+
-+            for (int dx = -1; dx <= 1; ++dx) {
-+                for (int dz = -1; dz <= 1; ++dz) {
-+                    chunkProvider.getChunkAtAsynchronously(chunkX + dx, chunkZ + dz,
-+                            (dx | dz) == 0 ? ChunkStatus.LIGHT : ChunkStatus.LIGHT.getPreviousStatus(),
-+                            true, false, onLoad);
-+                }
-+            }
++            chunkProvider.getChunkAtAsynchronously(chunkX, chunkZ, ChunkStatus.LIGHT, true, false, ret::complete);
 +
 +            return ret;
 +        }
@@ -4660,8 +4638,8 @@ index 0b80569648c1df01aab52d0b8d47028cda925d86..381bd11075599d44e4c705a8e754769d
 +                });
 +            }
 +        }, this.playerChunkMap.mainInvokingExecutor);
-     }
- 
++    }
++
 +    // override things from superclass
 +
 +    @Override
@@ -4695,7 +4673,7 @@ index 0b80569648c1df01aab52d0b8d47028cda925d86..381bd11075599d44e4c705a8e754769d
      public void close() {}
  
      @Override
-@@ -192,6 +403,15 @@ public class LightEngineThreaded extends LightEngine implements AutoCloseable {
+@@ -192,6 +369,15 @@ public class LightEngineThreaded extends LightEngine implements AutoCloseable {
      public void a(BlockPosition blockposition) {
          BlockPosition blockposition1 = blockposition.immutableCopy();
  
@@ -4711,7 +4689,7 @@ index 0b80569648c1df01aab52d0b8d47028cda925d86..381bd11075599d44e4c705a8e754769d
          this.a(blockposition.getX() >> 4, blockposition.getZ() >> 4, LightEngineThreaded.Update.POST_UPDATE, SystemUtils.a(() -> {
              super.a(blockposition1);
          }, () -> {
-@@ -200,6 +420,11 @@ public class LightEngineThreaded extends LightEngine implements AutoCloseable {
+@@ -200,6 +386,11 @@ public class LightEngineThreaded extends LightEngine implements AutoCloseable {
      }
  
      protected void a(ChunkCoordIntPair chunkcoordintpair) {
@@ -4723,7 +4701,7 @@ index 0b80569648c1df01aab52d0b8d47028cda925d86..381bd11075599d44e4c705a8e754769d
          this.a(chunkcoordintpair.x, chunkcoordintpair.z, () -> {
              return 0;
          }, LightEngineThreaded.Update.PRE_UPDATE, SystemUtils.a(() -> {
-@@ -224,6 +449,14 @@ public class LightEngineThreaded extends LightEngine implements AutoCloseable {
+@@ -224,6 +415,14 @@ public class LightEngineThreaded extends LightEngine implements AutoCloseable {
  
      @Override
      public void a(SectionPosition sectionposition, boolean flag) {
@@ -4738,7 +4716,7 @@ index 0b80569648c1df01aab52d0b8d47028cda925d86..381bd11075599d44e4c705a8e754769d
          this.a(sectionposition.a(), sectionposition.c(), () -> {
              return 0;
          }, LightEngineThreaded.Update.PRE_UPDATE, SystemUtils.a(() -> {
-@@ -235,6 +468,11 @@ public class LightEngineThreaded extends LightEngine implements AutoCloseable {
+@@ -235,6 +434,11 @@ public class LightEngineThreaded extends LightEngine implements AutoCloseable {
  
      @Override
      public void a(ChunkCoordIntPair chunkcoordintpair, boolean flag) {
@@ -4750,7 +4728,7 @@ index 0b80569648c1df01aab52d0b8d47028cda925d86..381bd11075599d44e4c705a8e754769d
          this.a(chunkcoordintpair.x, chunkcoordintpair.z, LightEngineThreaded.Update.PRE_UPDATE, SystemUtils.a(() -> {
              super.a(chunkcoordintpair, flag);
          }, () -> {
-@@ -244,6 +482,11 @@ public class LightEngineThreaded extends LightEngine implements AutoCloseable {
+@@ -244,6 +448,11 @@ public class LightEngineThreaded extends LightEngine implements AutoCloseable {
  
      @Override
      public void a(EnumSkyBlock enumskyblock, SectionPosition sectionposition, @Nullable NibbleArray nibblearray, boolean flag) {
@@ -4762,7 +4740,7 @@ index 0b80569648c1df01aab52d0b8d47028cda925d86..381bd11075599d44e4c705a8e754769d
          this.a(sectionposition.a(), sectionposition.c(), () -> {
              return 0;
          }, LightEngineThreaded.Update.PRE_UPDATE, SystemUtils.a(() -> {
-@@ -253,6 +496,7 @@ public class LightEngineThreaded extends LightEngine implements AutoCloseable {
+@@ -253,6 +462,7 @@ public class LightEngineThreaded extends LightEngine implements AutoCloseable {
          }));
      }
  
@@ -4770,7 +4748,7 @@ index 0b80569648c1df01aab52d0b8d47028cda925d86..381bd11075599d44e4c705a8e754769d
      private void a(int i, int j, LightEngineThreaded.Update lightenginethreaded_update, Runnable runnable) {
          this.a(i, j, this.d.c(ChunkCoordIntPair.pair(i, j)), lightenginethreaded_update, runnable);
      }
-@@ -265,6 +509,11 @@ public class LightEngineThreaded extends LightEngine implements AutoCloseable {
+@@ -265,6 +475,11 @@ public class LightEngineThreaded extends LightEngine implements AutoCloseable {
  
      @Override
      public void b(ChunkCoordIntPair chunkcoordintpair, boolean flag) {
@@ -4782,7 +4760,7 @@ index 0b80569648c1df01aab52d0b8d47028cda925d86..381bd11075599d44e4c705a8e754769d
          this.a(chunkcoordintpair.x, chunkcoordintpair.z, () -> {
              return 0;
          }, LightEngineThreaded.Update.PRE_UPDATE, SystemUtils.a(() -> {
-@@ -277,6 +526,35 @@ public class LightEngineThreaded extends LightEngine implements AutoCloseable {
+@@ -277,6 +492,35 @@ public class LightEngineThreaded extends LightEngine implements AutoCloseable {
      public CompletableFuture<IChunkAccess> a(IChunkAccess ichunkaccess, boolean flag) {
          ChunkCoordIntPair chunkcoordintpair = ichunkaccess.getPos();
  
@@ -4809,7 +4787,7 @@ index 0b80569648c1df01aab52d0b8d47028cda925d86..381bd11075599d44e4c705a8e754769d
 +                LightEngineThreaded.this.queueUpdate();
 +            }).whenComplete((IChunkAccess chunk, Throwable throwable) -> {
 +                if (throwable != null && !(throwable instanceof ThreadDeath)) {
-+                    LOGGER.fatal("Failed to light chunk " + ichunkaccess.getPos().toString() + " in world '" + this.theLightEngine.getWorld().getWorld().getName() + "'");
++                    LOGGER.fatal("Failed to light chunk " + ichunkaccess.getPos().toString() + " in world '" + this.theLightEngine.getWorld().getWorld().getName() + "'", throwable);
 +                }
 +            });
 +        }
@@ -4818,7 +4796,7 @@ index 0b80569648c1df01aab52d0b8d47028cda925d86..381bd11075599d44e4c705a8e754769d
          // Paper start
          //ichunkaccess.b(false); // Don't need to disable this
          long pair = chunkcoordintpair.pair();
-@@ -324,7 +602,7 @@ public class LightEngineThreaded extends LightEngine implements AutoCloseable {
+@@ -324,7 +568,7 @@ public class LightEngineThreaded extends LightEngine implements AutoCloseable {
      }
  
      public void queueUpdate() {
@@ -4827,7 +4805,7 @@ index 0b80569648c1df01aab52d0b8d47028cda925d86..381bd11075599d44e4c705a8e754769d
              this.b.a((() -> { // Paper - decompile error
                  this.b();
                  this.g.set(false);
-@@ -338,17 +616,36 @@ public class LightEngineThreaded extends LightEngine implements AutoCloseable {
+@@ -338,17 +582,36 @@ public class LightEngineThreaded extends LightEngine implements AutoCloseable {
      private final java.util.List<Runnable> pre = new java.util.ArrayList<>();
      private final java.util.List<Runnable> post = new java.util.ArrayList<>();
      private void b() {
@@ -4930,7 +4908,7 @@ index 1122df50a7f9cbc489e8da7a91e9af73476eb148..3738c51b5e673c439d88a7ef7f4614f3
      // Tuinity end - delay chunk unloads
      public static <T> TicketType<T> a(String s, Comparator<T> comparator) {
 diff --git a/src/main/java/net/minecraft/server/level/WorldServer.java b/src/main/java/net/minecraft/server/level/WorldServer.java
-index 61f60a957c298413e88df4e2e499855d6ada8204..53e343a351ff19912c04bfeb6dc731947c9fc3d8 100644
+index 31276fe09f0dc0bf59b97d45b2404e39478663bb..e67924369f778b16a2ee8d29c571756c1be1ebf9 100644
 --- a/src/main/java/net/minecraft/server/level/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/level/WorldServer.java
 @@ -515,6 +515,13 @@ public class WorldServer extends World implements GeneratorAccessSeed {
@@ -4948,10 +4926,10 @@ index 61f60a957c298413e88df4e2e499855d6ada8204..53e343a351ff19912c04bfeb6dc73194
      public WorldServer(MinecraftServer minecraftserver, Executor executor, Convertable.ConversionSession convertable_conversionsession, IWorldDataServer iworlddataserver, ResourceKey<World> resourcekey, DimensionManager dimensionmanager, WorldLoadListener worldloadlistener, ChunkGenerator chunkgenerator, boolean flag, long i, List<MobSpawner> list, boolean flag1, org.bukkit.World.Environment env, org.bukkit.generator.ChunkGenerator gen) {
          super(iworlddataserver, resourcekey, dimensionmanager, minecraftserver::getMethodProfiler, false, flag, i, gen, env, executor); // Paper pass executor
 diff --git a/src/main/java/net/minecraft/world/level/block/state/BlockBase.java b/src/main/java/net/minecraft/world/level/block/state/BlockBase.java
-index a96069c86ef5f5af4820436dd1f24e297bcca73f..0b852fa247c65cb1e889ad4e55886e256f89a763 100644
+index d338b6d9d0f4d85a22286233121d9dba5f7ad8cf..6124b56d935386784371422960a07d518f848cf3 100644
 --- a/src/main/java/net/minecraft/world/level/block/state/BlockBase.java
 +++ b/src/main/java/net/minecraft/world/level/block/state/BlockBase.java
-@@ -382,6 +382,7 @@ public abstract class BlockBase {
+@@ -383,6 +383,7 @@ public abstract class BlockBase {
              this.n = blockbase_info.s;
              this.o = blockbase_info.t;
              this.p = blockbase_info.u;
@@ -4959,7 +4937,7 @@ index a96069c86ef5f5af4820436dd1f24e297bcca73f..0b852fa247c65cb1e889ad4e55886e25
          }
          // Paper start - impl cached craft block data, lazy load to fix issue with loading at the wrong time
          private org.bukkit.craftbukkit.block.data.CraftBlockData cachedCraftBlockData;
-@@ -404,6 +405,19 @@ public abstract class BlockBase {
+@@ -405,6 +406,19 @@ public abstract class BlockBase {
          }
          // Tuinity end
  
@@ -4979,7 +4957,7 @@ index a96069c86ef5f5af4820436dd1f24e297bcca73f..0b852fa247c65cb1e889ad4e55886e25
          public void a() {
              this.fluid = this.getBlock().d(this.p()); // Paper - moved from getFluid()
              this.isTicking = this.getBlock().isTicking(this.p()); // Paper - moved from isTicking()
-@@ -413,6 +427,34 @@ public abstract class BlockBase {
+@@ -414,6 +428,34 @@ public abstract class BlockBase {
              this.shapeExceedsCube = this.a == null || this.a.c; // Tuinity - moved from actual method to here
              this.staticPathType = null; // Tuinity - cache static path type
              this.neighbourOverridePathType = null; // Tuinity - cache static path types
@@ -5014,7 +4992,7 @@ index a96069c86ef5f5af4820436dd1f24e297bcca73f..0b852fa247c65cb1e889ad4e55886e25
  
          }
  
-@@ -741,9 +783,9 @@ public abstract class BlockBase {
+@@ -742,9 +784,9 @@ public abstract class BlockBase {
              private static final int f = EnumBlockSupport.values().length;
              protected final boolean a;
              private final boolean g;
@@ -5186,10 +5164,10 @@ index 43b8361e8ad0a8c429406cb6ff538020f670bdbd..bb63ed58e1eaeb474e99992e39d811b2
  
      IBlockAccess getWorld();
 diff --git a/src/main/java/net/minecraft/world/level/chunk/NibbleArray.java b/src/main/java/net/minecraft/world/level/chunk/NibbleArray.java
-index 3a85a89be2a736e5b6b7f08032f4becd6bb39ed1..d32369d9a555fd7595df175e56f853ce8b012522 100644
+index 0fec15e141051863dbf51a2b3e1ace5028cd2fc1..d7757e60402be9939fc2d90ad79b2bb76c5249ca 100644
 --- a/src/main/java/net/minecraft/world/level/chunk/NibbleArray.java
 +++ b/src/main/java/net/minecraft/world/level/chunk/NibbleArray.java
-@@ -58,6 +58,7 @@ public class NibbleArray {
+@@ -59,6 +59,7 @@ public class NibbleArray {
      boolean poolSafe = false;
      public java.lang.Runnable cleaner;
      private void registerCleaner() {
@@ -5197,7 +5175,7 @@ index 3a85a89be2a736e5b6b7f08032f4becd6bb39ed1..d32369d9a555fd7595df175e56f853ce
          if (!poolSafe) {
              cleaner = MCUtil.registerCleaner(this, this.a, NibbleArray::releaseBytes);
          } else {
-@@ -65,7 +66,7 @@ public class NibbleArray {
+@@ -66,7 +67,7 @@ public class NibbleArray {
          }
      }
      // Paper end
@@ -5206,7 +5184,7 @@ index 3a85a89be2a736e5b6b7f08032f4becd6bb39ed1..d32369d9a555fd7595df175e56f853ce
  
  
      public NibbleArray() {}
-@@ -76,7 +77,7 @@ public class NibbleArray {
+@@ -77,7 +78,7 @@ public class NibbleArray {
      }
      public NibbleArray(byte[] abyte, boolean isSafe) {
          this.a = abyte;
@@ -5215,7 +5193,7 @@ index 3a85a89be2a736e5b6b7f08032f4becd6bb39ed1..d32369d9a555fd7595df175e56f853ce
          registerCleaner();
          // Paper end
          if (abyte.length != 2048) {
-@@ -164,7 +165,7 @@ public class NibbleArray {
+@@ -165,7 +166,7 @@ public class NibbleArray {
  
      public NibbleArray copy() { return this.b(); } // Paper - OBFHELPER
      public NibbleArray b() {
@@ -5225,10 +5203,19 @@ index 3a85a89be2a736e5b6b7f08032f4becd6bb39ed1..d32369d9a555fd7595df175e56f853ce
  
      public String toString() {
 diff --git a/src/main/java/net/minecraft/world/level/chunk/ProtoChunk.java b/src/main/java/net/minecraft/world/level/chunk/ProtoChunk.java
-index 72c258ae5c3cc93e42b86af9426b5e9715dc1599..692658893f9d33938fc4fed854ad31c14c920e95 100644
+index 72c258ae5c3cc93e42b86af9426b5e9715dc1599..c90f530b9cf556da950d8f61156159941815bd99 100644
 --- a/src/main/java/net/minecraft/world/level/chunk/ProtoChunk.java
 +++ b/src/main/java/net/minecraft/world/level/chunk/ProtoChunk.java
-@@ -66,6 +66,54 @@ public class ProtoChunk implements IChunkAccess {
+@@ -54,7 +54,7 @@ public class ProtoChunk implements IChunkAccess {
+     private final Map<BlockPosition, NBTTagCompound> i;
+     private final ChunkSection[] j;
+     private final List<NBTTagCompound> k;
+-    private final List<BlockPosition> l;
++    private final List<BlockPosition> l; private final java.util.concurrent.atomic.AtomicBoolean lightSourcesLocked = new java.util.concurrent.atomic.AtomicBoolean(); // Tuinity - warn when light sources are accessed while locked
+     private final ShortList[] m;
+     private final Map<StructureGenerator<?>, StructureStart<?>> n;
+     private final Map<StructureGenerator<?>, LongSet> o;
+@@ -66,6 +66,73 @@ public class ProtoChunk implements IChunkAccess {
      private volatile boolean u;
      final World world; // Paper - Anti-Xray - Add world // Paper - private -> default
  
@@ -5278,12 +5265,49 @@ index 72c258ae5c3cc93e42b86af9426b5e9715dc1599..692658893f9d33938fc4fed854ad31c1
 +        this.blockEmptinessMap = emptinessMap;
 +    }
 +
++    private void checkLightSourceLock() {
++        if (!this.lightSourcesLocked.get()) {
++            return;
++        }
++
++        IllegalStateException thr = new IllegalStateException("Concurrent access of light sources by thread '" + Thread.currentThread().getName() + "'");
++        LOGGER.fatal(thr.getMessage(), thr);
++        throw thr;
++    }
++
++    public void lockLightSources() {
++        if (this.lightSourcesLocked.getAndSet(true)) {
++            throw new IllegalStateException("Light sources is already locked!");
++        }
++    }
++
++    public void releaseLightSources() {
++        this.lightSourcesLocked.set(false);
++    }
 +    // Tuinity end - rewrite light engine
 +
      // Paper start - Anti-Xray - Add world
      @Deprecated public ProtoChunk(ChunkCoordIntPair chunkcoordintpair, ChunkConverter chunkconverter) { this(chunkcoordintpair, chunkconverter, null); } // Notice for updates: Please make sure this constructor isn't used anywhere
      public ProtoChunk(ChunkCoordIntPair chunkcoordintpair, ChunkConverter chunkconverter, World world) {
-@@ -191,7 +239,7 @@ public class ProtoChunk implements IChunkAccess {
+@@ -170,7 +237,9 @@ public class ProtoChunk implements IChunkAccess {
+     }
+ 
+     public void k(BlockPosition blockposition) {
++        this.checkLightSourceLock(); // Tuinity - make sure we don't access this concurrently
+         this.l.add(blockposition.immutableCopy());
++        this.checkLightSourceLock(); // Tuinity - make sure we don't access this concurrently
+     }
+ 
+     @Nullable
+@@ -185,13 +254,15 @@ public class ProtoChunk implements IChunkAccess {
+                 return iblockdata;
+             } else {
+                 if (iblockdata.f() > 0) {
++                    this.checkLightSourceLock(); // Tuinity - make sure we don't access this concurrently
+                     this.l.add(new BlockPosition((i & 15) + this.getPos().d(), j, (k & 15) + this.getPos().e()));
++                    this.checkLightSourceLock(); // Tuinity - make sure we don't access this concurrently
+                 }
+ 
                  ChunkSection chunksection = this.a(j >> 4);
                  IBlockData iblockdata1 = chunksection.setType(i & 15, j & 15, k & 15, iblockdata);
  

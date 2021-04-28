@@ -20,7 +20,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 diff --git a/src/main/java/net/minecraft/world/entity/EntityLiving.java b/src/main/java/net/minecraft/world/entity/EntityLiving.java
-index d991e3be65dc94597bd56ad9e034972e0e99a840..1a7866bed9cb7f0431454d3af4733de05c0cba78 100644
+index 5c7ce20609a1c18687696581a76f21a1b182ea7c..74f80b6af18c0b91d9613384ca6bafd9c89f23a4 100644
 --- a/src/main/java/net/minecraft/world/entity/EntityLiving.java
 +++ b/src/main/java/net/minecraft/world/entity/EntityLiving.java
 @@ -910,11 +910,13 @@ public abstract class EntityLiving extends Entity {

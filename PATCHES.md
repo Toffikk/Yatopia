@@ -151,6 +151,7 @@ This is an overview over all patches that are currently used.
 | server |  Consolidate flush calls for entity tracker packets      | Spottedleaf |  |
 | server |  Controllable Minecarts      | William Blake Galbreath |  |
 | server |  Copy passenger list in enderTeleportTo      | Spottedleaf |  |
+| server |  Correctly handle recursion for chunkholder updates      | Spottedleaf |  |
 | server |  Cows eat mushrooms      | William Blake Galbreath |  |
 | server |  Crying obsidian valid for portal frames      | William Blake Galbreath |  |
 | server |  Custom Locale Support      | Zoe |  |
@@ -169,14 +170,18 @@ This is an overview over all patches that are currently used.
 | server |  Distance manager tick timings      | Spottedleaf |  |
 | server |  Do not allow the server to unload chunks at request of      | Spottedleaf |  |
 | server |  Do not allow ticket level changes while unloading      | Spottedleaf |  |
+| server |  Do not copy visible chunks      | Spottedleaf |  |
 | server |  Do not load chunks during a crash report      | Spottedleaf |  |
 | server |  Do not retain playerchunkmap instance in light thread factory      | Spottedleaf |  |
 | server |  Do not run close logic for inventories on chunk unload      | Spottedleaf |  |
 | server |  Do not run raytrace logic for AIR      | Spottedleaf |  |
+| server |  Do not schedule poi task for each block write on chunk gen      | Spottedleaf |  |
+| server |  Do not update TE&#39;s in generating chunks      | Spottedleaf |  |
 | server |  Don&#39;t allow StructureLocateEvent to change worlds      | Spottedleaf |  |
 | server |  Don&#39;t get entity equipment if not needed      | Paul Sauve |  |
 | server |  Don&#39;t load chunk with seed based feature search      | Phoenix616 |  |
 | server |  Don&#39;t lookup fluid state when raytracing      | Spottedleaf |  |
+| server |  Don&#39;t read neighbour chunk data off disk when converting      | Spottedleaf |  |
 | server |  Don&#39;t trigger Lootable Refresh for non player interaction      | Aikar |  |
 | server |  Don&#39;t wake up entities when damage event is cancelled      | Phoenix616 |  |
 | server |  Dont run with scissors!      | JustDoom |  |
@@ -203,7 +208,6 @@ This is an overview over all patches that are currently used.
 | server |  Fix IndexOutOfBoundsException when sending too many changes      | Ivan Pekov |  |
 | server |  Fix LightEngineThreaded memory leak      | Ivan Pekov |  |
 | server |  Fix NPE in pickup logic for arrow      | Spottedleaf |  |
-| server |  Fix PlayerEditBookEvent not saving new book      | BillyGalbreath |  |
 | server |  Fix chunks refusing to unload at low TPS      | Spottedleaf |  |
 | server |  Fix cow rotation when shearing mooshroom      | William Blake Galbreath |  |
 | server |  Fix exp drop of zombie pigmen (MC-56653)      | Phoenix616 |  |
@@ -234,6 +238,7 @@ This is an overview over all patches that are currently used.
 | server |  Implement respawn anchor explosion options      | William Blake Galbreath |  |
 | server |  Improve abnormal server shutdown process      | Spottedleaf |  |
 | server |  Improve async tp to not load chunks when crossing worlds      | Spottedleaf |  |
+| server |  Improve fluid direction caching      | Paul Sauve |  |
 | server |  Improve paper prevent moving into unloaded chunk check      | Spottedleaf |  |
 | server |  Improved oversized chunk data packet handling      | Spottedleaf |  |
 | server |  Infinite fuel furnace      | William Blake Galbreath |  |
@@ -250,6 +255,7 @@ This is an overview over all patches that are currently used.
 | api |  Lagging threshold      | William Blake Galbreath |  |
 | server |  Left handed API      | BillyGalbreath |  |
 | api |  Left handed API      | BillyGalbreath |  |
+| server |  Lithium: CompactSineLUT      | JellySquid |  |
 | server |  LivingEntity safeFallDistance      | William Blake Galbreath |  |
 | api |  LivingEntity safeFallDistance      | William Blake Galbreath |  |
 | server |  LivingEntity#broadcastItemBreak      | William Blake Galbreath |  |
@@ -276,6 +282,7 @@ This is an overview over all patches that are currently used.
 | server |  Movement options for armor stands      | Mariell Hoversholm |  |
 | server |  Multi-Threaded Server Ticking Vanilla      | Spottedleaf |  |
 | server |  Multi-Threaded ticking CraftBukkit      | Spottedleaf |  |
+| server |  Multithreaded Entity Tracker fixup      | Simon Gardling |  |
 | server |  Multithreaded entity tracking      | Paul Sauve |  |
 | server |  Name craft scheduler threads according to the plugin using      | Spottedleaf |  |
 | server |  New nbt cache      | Hugo Planque | ishland |
@@ -305,7 +312,7 @@ This is an overview over all patches that are currently used.
 | server |  Option for Villager Clerics to farm Nether Wart      | jmp |  |
 | server |  Option for chests to open even with a solid block on top      | jmp |  |
 | server |  Option for simpler Villagers      | tr7zw |  |
-| server |  Option to make doors require restone      | BillyGalbreath |  |
+| server |  Option to make doors require redstone      | BillyGalbreath |  |
 | server |  Option to toggle milk curing bad omen      | William Blake Galbreath |  |
 | server |  Origami - Fix ProtocolLib issues on Java 15      | Phoenix616 |  |
 | server |  Origami Server Config      | Phoenix616 |  |
@@ -318,6 +325,7 @@ This is an overview over all patches that are currently used.
 | server |  Phantoms attracted to crystals and crystals shoot phantoms      | William Blake Galbreath |  |
 | api |  Phantoms attracted to crystals and crystals shoot phantoms      | William Blake Galbreath |  |
 | server |  Phantoms burn in light      | draycia |  |
+| server |  Piglin portal spawn modifier      | BillyGalbreath |  |
 | server |  Pigs give saddle back      | William Blake Galbreath |  |
 | server |  Player invulnerabilities      | William Blake Galbreath |  |
 | api |  Player invulnerabilities      | William Blake Galbreath |  |
@@ -329,6 +337,8 @@ This is an overview over all patches that are currently used.
 | api |  PlayerSetSpawnerTypeWithEggEvent      | William Blake Galbreath |  |
 | server |  Players should not cram to death      | William Blake Galbreath |  |
 | server |  Populator seed controls      | Spottedleaf |  |
+| server |  Port Cadmium      | Lucy-t |  |
+| server |  Port LazyDFU      | Andrew Steinborn |  |
 | server |  Preload ProtocolLib EnumWrappers      | ishland |  |
 | server |  Prevent long map entry creation in light engine      | Spottedleaf |  |
 | server |  Prevent unload() calls removing tickets for sync loads      | Spottedleaf |  |
@@ -356,6 +366,7 @@ This is an overview over all patches that are currently used.
 | server |  Remove streams      | Paul Sauve |  |
 | server |  Remove streams for villager AI      | Spottedleaf |  |
 | server |  Replace player chunk loader system      | Spottedleaf |  |
+| server |  Replace ticket level propagator      | Spottedleaf |  |
 | server |  Revert MC-4 fix      | Spottedleaf |  |
 | server |  Revert getChunkAt(Async) retaining chunks for long periods of      | Spottedleaf |  |
 | server |  Rework PlayerChunk main thread checks      | Spottedleaf |  |
@@ -383,6 +394,7 @@ This is an overview over all patches that are currently used.
 | server |  Spread out and optimise player list ticks      | James Lyne |  |
 | server |  Squid EAR immunity      | William Blake Galbreath |  |
 | server |  Stonecutter damage      | William Blake Galbreath |  |
+| server |  Stop large move vectors in player packet handling from      | Spottedleaf |  |
 | server |  Stop squids floating on top of water      | William Blake Galbreath |  |
 | server |  Stop wasting resources on JsonList#get      | Ivan Pekov |  |
 | server |  Striders give saddle back      | Ben Kerllenevich |  |
@@ -426,6 +438,13 @@ This is an overview over all patches that are currently used.
 | server |  lithium NoiseChunkGeneratorMixin      | JellySquid |  |
 | server |  lithium PerlinNoiseSamplerMixin      | JellySquid | Bud Gidiere |
 | server |  lithium VoronoiBiomeAccessTypeMixin      | JellySquid |  |
+| server |  lithium block      | JellySquid | Hugo Planque |
+| server |  lithium entity      | JellySquid | Hugo Planque |
 | server |  lithium enum_values      | JellySquid |  |
+| server |  lithium gen      | JellySquid | Hugo Planque |
 | server |  lithium reduce allocations      | JellySquid | Mykyta Komarnytskyy |
+| server |  lithium shape      | JellySquid | Hugo Planque |
 | server |  lithium: cache chunk gen sea level      | SuperCoder7979 |  |
+| server |  lithium: optimize &#96;BlockPos.iterateOutwards&#96; by caching      | 2No2Name |  |
+| server |  lithium: skip ticking block entities that are doing nothing      | 2No2Name |  |
+| server |  tic-tacs: unblocking      | Gegy |  |

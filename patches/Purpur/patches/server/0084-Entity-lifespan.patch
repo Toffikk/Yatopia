@@ -5,10 +5,10 @@ Subject: [PATCH] Entity lifespan
 
 
 diff --git a/src/main/java/net/minecraft/server/network/PlayerConnection.java b/src/main/java/net/minecraft/server/network/PlayerConnection.java
-index 72dda95171cf7d4632256b4d661338209d2adfb5..c5549b74a3875c0fa1bfe8f270b25b59317073a3 100644
+index d309552f56f5ea695d57a95ed0a091f4c383ca34..77e7f3f33b13050ff383458ae294906c5ff77476 100644
 --- a/src/main/java/net/minecraft/server/network/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/network/PlayerConnection.java
-@@ -2443,6 +2443,7 @@ public class PlayerConnection implements PacketListenerPlayIn {
+@@ -2457,6 +2457,7 @@ public class PlayerConnection implements PacketListenerPlayIn {
                      boolean triggerLeashUpdate = itemInHand != null && itemInHand.getItem() == Items.LEAD && entity instanceof EntityInsentient;
                      Item origItem = this.player.inventory.getItemInHand() == null ? null : this.player.inventory.getItemInHand().getItem();
                      PlayerInteractEntityEvent event;

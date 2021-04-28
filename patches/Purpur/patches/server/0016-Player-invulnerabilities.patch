@@ -5,7 +5,7 @@ Subject: [PATCH] Player invulnerabilities
 
 
 diff --git a/src/main/java/net/minecraft/server/level/EntityPlayer.java b/src/main/java/net/minecraft/server/level/EntityPlayer.java
-index f30dcbd26ed56ba8f1a99260722a0b395c220954..7cd1ae92768164b657af9febe9b4feb7fd02f55a 100644
+index 7e388dcca2d4e78b49d5fc5fce0b962e74839fa3..e875671ce985199bc37de131280935a859253954 100644
 --- a/src/main/java/net/minecraft/server/level/EntityPlayer.java
 +++ b/src/main/java/net/minecraft/server/level/EntityPlayer.java
 @@ -284,6 +284,8 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
@@ -67,10 +67,10 @@ index f30dcbd26ed56ba8f1a99260722a0b395c220954..7cd1ae92768164b657af9febe9b4feb7
      public Scoreboard getScoreboard() {
          return getBukkitEntity().getScoreboard().getHandle();
 diff --git a/src/main/java/net/minecraft/server/network/PlayerConnection.java b/src/main/java/net/minecraft/server/network/PlayerConnection.java
-index 9603503f8959379c3b6e30b22946fa2b6b100504..016e4c92545ee6effe0311ad7651255cb88bd9f2 100644
+index e58bbd4c1b59293ddf58d0f7cf37a629f5cc96d6..7955d1d8cbb836be55d194d66152eb49fee27e49 100644
 --- a/src/main/java/net/minecraft/server/network/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/network/PlayerConnection.java
-@@ -1882,6 +1882,7 @@ public class PlayerConnection implements PacketListenerPlayIn {
+@@ -1896,6 +1896,7 @@ public class PlayerConnection implements PacketListenerPlayIn {
          PlayerConnectionUtils.ensureMainThread(packetplayinresourcepackstatus, this, this.player.getWorldServer());
          // Paper start
          PlayerResourcePackStatusEvent.Status packStatus = PlayerResourcePackStatusEvent.Status.values()[packetplayinresourcepackstatus.status.ordinal()];
@@ -79,7 +79,7 @@ index 9603503f8959379c3b6e30b22946fa2b6b100504..016e4c92545ee6effe0311ad7651255c
          this.server.getPluginManager().callEvent(new PlayerResourcePackStatusEvent(getPlayer(), packStatus));
          // Paper end
 diff --git a/src/main/java/net/minecraft/server/players/PlayerList.java b/src/main/java/net/minecraft/server/players/PlayerList.java
-index 499b516330f3f3a48fb64802f2e8c1b7c9684f4d..25983bce99fa3c2b5a571499ced145be0934091f 100644
+index 0b5cf23932c3c626d8805d4db97d2bbab63634cf..a285d0594e61190a751a96f22afeb12d2dcce3fe 100644
 --- a/src/main/java/net/minecraft/server/players/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/players/PlayerList.java
 @@ -1007,6 +1007,8 @@ public abstract class PlayerList {

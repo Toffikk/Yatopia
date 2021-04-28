@@ -5,7 +5,7 @@ Subject: [PATCH] Reduce allocation rate from crammed entities
 
 
 diff --git a/src/main/java/net/minecraft/world/entity/EntityLiving.java b/src/main/java/net/minecraft/world/entity/EntityLiving.java
-index b0ee9e98d5f1e56c8d82e90dd7761c8ef79cfb1c..561905be42428855a07a2e63aca80d5dd63b22bf 100644
+index 2537c9fcf155253da53ada3829c3caca765f35f4..96cc46a26eef701b0579f3407e67af9176e1743b 100644
 --- a/src/main/java/net/minecraft/world/entity/EntityLiving.java
 +++ b/src/main/java/net/minecraft/world/entity/EntityLiving.java
 @@ -2973,7 +2973,11 @@ public abstract class EntityLiving extends Entity {
