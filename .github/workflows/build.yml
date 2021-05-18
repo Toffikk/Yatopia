@@ -43,7 +43,7 @@ jobs:
          git config --global user.name "Github CI"
          git config --global gc.auto 0
          sudo chmod -R -f 777 ./gradlew
-         ./gradlew initGitSubmodules
+         ./gradlew initGitSubmodules --warning-mode all
          
     - name: Get MC Version
       run: echo "::set-output name=mcver::$(cat "Paper/work/BuildData/info.json"  | grep minecraftVersion | cut -d '"' -f 4)" 
@@ -58,8 +58,8 @@ jobs:
         
     - name: Apply Patches
       run: |
-        ./gradlew setupUpstream
-        ./gradlew applyPatches
+        ./gradlew setupUpstream --warning-mode all
+        ./gradlew applyPatches --warning-mode all
                  
     - name: Pull Maven Cache
       uses: actions/cache@v2
