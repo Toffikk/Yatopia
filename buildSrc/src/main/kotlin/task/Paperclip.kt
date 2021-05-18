@@ -12,7 +12,7 @@ import toothpick
 internal fun Project.createPaperclipTask(
     receiver: Task.() -> Unit = {}
 ): Task = tasks.create("paperclip") {
-    dependsOn(shadowJar)
+    dependsOn("shadowJar")
     receiver(this)
     group = taskGroup
     doLast {
