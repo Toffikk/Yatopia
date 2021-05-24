@@ -51,8 +51,6 @@ import java.util.zip.ZipFile;
 
 @DisableCachingByDefault
 public class MakePatchesTask extends DefaultTask {
-    
-     dependsOn(":yatopia-server:jar");
 
     @OutputDirectory
     private final File outputDir = ((Copy) getProject().getTasks().getByPath("processResources")).getDestinationDir().toPath().resolve("patches").toFile();
