@@ -104,7 +104,7 @@ public class MakePatchesTask extends DefaultTask {
 
     @TaskAction
     public void genPatches() throws IOException, InterruptedException {
-            dependsOn(":yatopia-server:jar")
+            dependsOn(":yatopia-server:jar");
         Preconditions.checkNotNull(originalJar);
         Preconditions.checkNotNull(targetJar);
         getLogger().lifecycle("Generating patches for " + originalJar + " -> " + targetJar);
