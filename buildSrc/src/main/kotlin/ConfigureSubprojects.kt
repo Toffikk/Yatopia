@@ -40,6 +40,8 @@ internal fun Project.configureSubprojects() {
 
         tasks.withType<JavaCompile> {
             options.encoding = UTF_8.name()
+            options.isFork = true
+            options.isIncremental = true
         }
         tasks.withType<Javadoc> {
             options.encoding = UTF_8.name()
