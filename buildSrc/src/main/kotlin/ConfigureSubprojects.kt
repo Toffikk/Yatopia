@@ -71,14 +71,12 @@ private fun Project.configureYatoclipProject() {
     }
 
     apply<JavaLibraryPlugin>()
-    apply<ShadowPlugin>()
 
     tasks.register<MakePatchesTask>("genPatches") {
         originalJar = rootProject.toothpick.paperDir.resolve("work").resolve("Minecraft")
             .resolve(rootProject.toothpick.minecraftVersion).resolve("${rootProject.toothpick.minecraftVersion}-m.jar")
         targetJar = rootProject.toothpick.serverProject.project.tasks.getByName("jar").outputs.files.singleFile
         // not sure why idea mark this as invalid
-        setRemapper(rootProject.toothpick.serverProject.project.extensions.getByName("relocations") as RelocatorRemapper?)
         dependsOn(rootProject.toothpick.serverProject.project.tasks.getByName("jar"))
         doLast {
             val prop = Properties()
@@ -115,7 +113,7 @@ private fun Project.configureYatoclipProject() {
 
     tasks.register<Copy>("copyJar") {
         val targetName = "yatopia-${rootProject.toothpick.minecraftVersion}-yatoclip.jar"
-        from(shadowJar.outputs.files.singleFile) {
+        from(jar.outputs.files.singleFile) {
             rename { targetName }
         }
 
@@ -143,7 +141,6 @@ private fun Project.configureYatoclipProject() {
 }
 
 private fun Project.configureServerProject() {
-    apply<ShadowPlugin>()
 
     val generatePomFileForMavenJavaPublication by tasks.getting(GenerateMavenPom::class) {
         destination = project.buildDir.resolve("tmp/pom.xml")
@@ -154,18 +151,7 @@ private fun Project.configureServerProject() {
         exclude("org/bukkit/craftbukkit/inventory/ItemStack*Test.class")
     }
 
-        val relocationSet = ArrayList<Relocator>()
-
         // Don't like to do this but sadly have to do this for compatibility reasons
-        val simpleRelocator = SimpleRelocator(
-            "org.bukkit.craftbukkit",
-            "org.bukkit.craftbukkit.v${toothpick.nmsPackage}",
-            listOf(),
-            listOf("org.bukkit.craftbukkit.Main*")
-        )
-        relocate(simpleRelocator)
-        relocationSet.add(simpleRelocator)
-
         // Make sure we relocate deps the same as Paper et al.
         val dom = project.parsePom() ?: return@getting
         val buildSection = dom.search("build").first()
