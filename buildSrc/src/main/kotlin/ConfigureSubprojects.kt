@@ -1,10 +1,3 @@
-import com.github.jengelman.gradle.plugins.shadow.ShadowPlugin
-import com.github.jengelman.gradle.plugins.shadow.ShadowStats
-import com.github.jengelman.gradle.plugins.shadow.impl.RelocatorRemapper
-import com.github.jengelman.gradle.plugins.shadow.relocation.Relocator
-import com.github.jengelman.gradle.plugins.shadow.relocation.SimpleRelocator
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-// import com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer
 import transformer.ModifiedLog4j2PluginsCacheFileTransformer
 import relocation.ToothpickRelocator
 import kotlinx.dom.elements
@@ -40,6 +33,8 @@ internal fun Project.configureSubprojects() {
 
         tasks.withType<JavaCompile> {
             options.encoding = UTF_8.name()
+            options.isFork = true
+            options.isIncremental = true
         }
         tasks.withType<Javadoc> {
             options.encoding = UTF_8.name()
@@ -81,10 +76,10 @@ private fun Project.configureYatoclipProject() {
     tasks.register<MakePatchesTask>("genPatches") {
         originalJar = rootProject.toothpick.paperDir.resolve("work").resolve("Minecraft")
             .resolve(rootProject.toothpick.minecraftVersion).resolve("${rootProject.toothpick.minecraftVersion}-m.jar")
-        targetJar = rootProject.toothpick.serverProject.project.tasks.getByName("shadowJar").outputs.files.singleFile
+        targetJar = rootProject.toothpick.serverProject.project.tasks.getByName("jar").outputs.files.singleFile
         // not sure why idea mark this as invalid
         setRemapper(rootProject.toothpick.serverProject.project.extensions.getByName("relocations") as RelocatorRemapper?)
-        dependsOn(rootProject.toothpick.serverProject.project.tasks.getByName("shadowJar"))
+        dependsOn(rootProject.toothpick.serverProject.project.tasks.getByName("jar"))
         doLast {
             val prop = Properties()
             prop.setProperty("minecraftVersion", rootProject.toothpick.minecraftVersion)
@@ -135,7 +130,7 @@ private fun Project.configureYatoclipProject() {
 
     tasks.getByName("processResources").dependsOn(tasks.getByName("genPatches"))
     tasks.getByName("assemble").dependsOn(tasks.getByName("copyJar"))
-    tasks.getByName("jar").enabled = false
+    tasks.getByName("jar").enabled = true
     val buildTask = tasks.getByName("build")
     val buildTaskDependencies = HashSet(buildTask.dependsOn)
     buildTask.setDependsOn(HashSet<Task>())
@@ -158,27 +153,6 @@ private fun Project.configureServerProject() {
         // didn't bother to look into why these fail. paper excludes them in paperweight as well though
         exclude("org/bukkit/craftbukkit/inventory/ItemStack*Test.class")
     }
-
-    val shadowJar by tasks.getting(ShadowJar::class) {
-        archiveClassifier.set("") // ShadowJar is the main server artifact
-        dependsOn(generatePomFileForMavenJavaPublication)
-        transform(ModifiedLog4j2PluginsCacheFileTransformer::class.java)
-        mergeServiceFiles()
-        manifest {
-            attributes(
-                    "Main-Class" to "org.bukkit.craftbukkit.Main",
-                    "Implementation-Title" to "CraftBukkit",
-                    "Implementation-Version" to toothpick.forkVersion,
-                    "Implementation-Vendor" to SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(Date()),
-                    "Specification-Title" to "Bukkit",
-                    "Specification-Version" to "${project.rootProject.toothpick.minecraftVersion}-${project.rootProject.toothpick.nmsRevision}",
-                    "Specification-Vendor" to "Bukkit Team"
-            )
-        }
-        from(project.buildDir.resolve("tmp/pom.xml")) {
-            // dirty hack to make "java -Dpaperclip.install=true -jar paperclip.jar" work without forking paperclip
-            into("META-INF/maven/io.papermc.paper/paper")
-        }
 
         val relocationSet = ArrayList<Relocator>()
 
@@ -224,13 +198,13 @@ private fun Project.configureServerProject() {
         project.extensions.add("relocations", RelocatorRemapper(relocationSet, ShadowStats()))
     }
     tasks.getByName("build") {
-        dependsOn(shadowJar)
+        dependsOn(jar)
     }
 
     extensions.configure<PublishingExtension> {
         publications {
-            create<MavenPublication>("shadow") {
-                artifact(project.tasks.named("shadowJar"))
+            create<MavenPublication>("jar") {
+                artifact(project.tasks.named("jar"))
             }
         }
     }
