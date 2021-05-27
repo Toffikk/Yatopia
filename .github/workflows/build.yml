@@ -77,11 +77,11 @@ jobs:
 
     - name: Build Yatopia
       run: |
-        ./gradlew clean build paperclip
+        ./gradlew clean build yatoclip
         
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
       with:
         name: Yatopia-${{ matrix.java }}
-        path: yatopia-${{ steps.mcver.outputs.mcver }}-paperclip.jar
+        path: yatopia-${{ steps.mcver.outputs.mcver }}-yatoclip.jar
       
