@@ -77,7 +77,7 @@ jobs:
 
     - name: Build Yatopia
       run: |
-        ./gradlew clean build paperclip
+        ./gradlew clean build yatoclip
         
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
