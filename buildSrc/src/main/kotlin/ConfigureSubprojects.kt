@@ -39,6 +39,8 @@ internal fun Project.configureSubprojects() {
         apply<MavenPublishPlugin>()
 
         tasks.withType<JavaCompile> {
+            options.isIncremental = true
+            options.isFork = true
             options.encoding = UTF_8.name()
         }
         tasks.withType<Javadoc> {
