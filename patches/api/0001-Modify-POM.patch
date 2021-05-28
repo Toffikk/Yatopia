@@ -5,7 +5,7 @@ Subject: [PATCH] Modify POM
 
 
 diff --git a/pom.xml b/pom.xml
-index 6c200882954adc4831307f3d6dfa3202571fb30b..4aefa793f1db26908e5476f03d89858b5925e3cb 100644
+index 6fd6066b16d4dbf8695be16ec8b2d135d4d04901..57f8d001e6a83ea6ada0fb820a4e5b25866c0edb 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -3,18 +3,18 @@
@@ -32,8 +32,8 @@ index 6c200882954adc4831307f3d6dfa3202571fb30b..4aefa793f1db26908e5476f03d89858b
      <description>An enhanced plugin API for Minecraft servers.</description>
  
      <properties>
-@@ -24,6 +24,19 @@
-         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+@@ -25,6 +25,19 @@
+         <adventure.version>4.7.0</adventure.version> <!-- Paper - When updating this make sure to update the linked JavaDocs on the homepage as well! -->
      </properties>
  
 +    <!-- Yatopia start -->
@@ -52,3 +52,45 @@ index 6c200882954adc4831307f3d6dfa3202571fb30b..4aefa793f1db26908e5476f03d89858b
      <repositories>
          <repository>
              <id>sonatype</id>
+@@ -68,7 +81,7 @@
+         <dependency>
+             <groupId>it.unimi.dsi</groupId>
+             <artifactId>fastutil</artifactId>
+-            <version>8.2.2</version>
++            <version>8.5.4</version>
+             <scope>provided</scope>
+         </dependency>
+         <dependency>
+@@ -115,7 +128,7 @@
+         <dependency>
+             <groupId>org.yaml</groupId>
+             <artifactId>snakeyaml</artifactId>
+-            <version>1.27</version>
++            <version>1.28</version>
+             <scope>compile</scope>
+         </dependency>
+         <!-- not part of the API proper -->
+@@ -148,7 +161,7 @@
+         <dependency>
+             <groupId>org.slf4j</groupId>
+             <artifactId>slf4j-api</artifactId>
+-            <version>1.7.25</version>
++            <version>1.7.30</version>
+             <scope>compile</scope>
+         </dependency>
+         <!-- testing -->
+@@ -174,12 +187,12 @@
+         <dependency>
+             <groupId>org.ow2.asm</groupId>
+             <artifactId>asm</artifactId>
+-            <version>9.0</version>
++            <version>9.1</version>
+         </dependency>
+         <dependency>
+             <groupId>org.ow2.asm</groupId>
+             <artifactId>asm-commons</artifactId>
+-            <version>9.0</version>
++            <version>9.1</version>
+         </dependency>
+     </dependencies>
+ 

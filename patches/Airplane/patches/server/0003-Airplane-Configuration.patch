@@ -22,10 +22,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 diff --git a/pom.xml b/pom.xml
-index a3a3b17f3b30b55bb50905353e77723091bb5c1f..f9ead3ed315a3e726233545f35358cca0fc68e06 100644
+index 6dc6469928051a2a38e8eba43aa237b0f21a502f..65c8a649cb0e4d2d8d1b1c21ec30405f60539b9f 100644
 --- a/pom.xml
 +++ b/pom.xml
-@@ -159,6 +159,13 @@
+@@ -193,6 +193,13 @@
              <version>1.1.0-SNAPSHOT</version>
              <scope>compile</scope>
          </dependency>
@@ -183,11 +183,11 @@ index 0000000000000000000000000000000000000000..807cf274619b8f7be839e249cb62b981
 +    }
 +}
 diff --git a/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java b/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
-index d902efdb8f2d42ea4c3933f7fa76ebe135ee09db..24a46ad36613faa5f5a1a12b70f7af886e1608ae 100644
+index 392a707d7d71f2009134741529fb9539bd025619..60aad444eec3af7364b84ec3f696d3b78586cd6a 100644
 --- a/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
 +++ b/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
-@@ -215,6 +215,8 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
-         com.destroystokyo.paper.VersionHistoryManager.INSTANCE.getClass(); // load version history now
+@@ -216,6 +216,8 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
+         io.papermc.paper.brigadier.PaperBrigadierProviderImpl.INSTANCE.getClass(); // init PaperBrigadierProvider
          // Paper end
          com.tuinity.tuinity.config.TuinityConfig.init((java.io.File) options.valueOf("tuinity-settings")); // Tuinity - Server Config
 +        gg.airplane.AirplaneConfig.load(); // Airplane - config

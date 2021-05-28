@@ -47,7 +47,7 @@ index f10fa659680f8a574f77d260bbc52be349c244e8..182f419fde8eb3646a79cc0ba689ee48
  
          public final String worldName;
 diff --git a/src/main/java/net/minecraft/server/level/ChunkMapDistance.java b/src/main/java/net/minecraft/server/level/ChunkMapDistance.java
-index aac3f74af760e8d7dbb1e9d4031ce1aabe45ca21..8d4944fa1c761bb3ab299ec639663e7f52b512a3 100644
+index 4dfc1101d5fc78630ef8b816e8f84f5541683f0b..c474ee61d98772a2852c44dec1c4a1037472ed2c 100644
 --- a/src/main/java/net/minecraft/server/level/ChunkMapDistance.java
 +++ b/src/main/java/net/minecraft/server/level/ChunkMapDistance.java
 @@ -40,7 +40,7 @@ public abstract class ChunkMapDistance {
@@ -247,7 +247,7 @@ index 3c804c7b20a14ea6e510810e2be10c1cc89ff5c1..47da7efffde2e6d63c1a064b950abf81
          return new TicketType<>(s, comparator, 0L);
      }
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
-index e739b4f8a7b8785ceb11c553bd27e2fe0e64a4bb..42babc6dc316374981e4a5e813d38645927e982d 100644
+index 9d858f91828d6c2787ff1dc677a247bcab172701..bc18949c18fb1c8b85d44aff1a3255900013bab7 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
 @@ -505,6 +505,7 @@ public class CraftWorld implements World {
