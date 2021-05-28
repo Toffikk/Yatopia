@@ -1,6 +1,10 @@
 name: Feature Request
 description: Suggest an feature
 body:
+  - type: markdown
+    attributes:
+      value: |
+
   - type: textarea
     attributes:
       label: Is your feature request related to a problem?
