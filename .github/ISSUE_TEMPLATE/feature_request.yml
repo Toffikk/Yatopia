@@ -4,6 +4,9 @@ body:
   - type: markdown
     attributes:
       value: |
+        Thank you for filling out a feature request for Yatopia! Please be as detailed as possible so that we may consider and review the request easier.
+        We ask that you search all the issues to avoid a duplicate feature request. If one exists, please reply if you have anything to add.
+        Before requesting a new feature, please make sure you are using the latest version and that the feature you are requesting is not already in Yatopia.
 
   - type: textarea
     attributes:
@@ -30,3 +33,4 @@ body:
       description: Add any other context or screenshots about the feature request below.
     validations:
       required: false
+      
